@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Camera Calibration</title>
+<script>
+    if (typeof module === 'object') {
+        window.module = module;
+        module = undefined;
+    }
+</script>
+<script src="./js/jquery.min.js"></script>
+<script src="./js/jquery-ui.js"></script>
+<script>
+    if (window.module)
+        module = window.module;
+</script>
+<script type="text/javascript" src="./js/loader.js"></script>
+<script src="./js/requires.js" defer></script>
+<script src="./js/file_utils.js" defer></script>
+<script src="./js/global.js" defer></script>
+<script src="./js/parser.js" defer></script>
+<script src="./js/cal.js" defer></script>
+<script src="./js/plotly-mod.min.js"></script>
+<script src="./js/viewer.js" defer></script>
+<script src="./js/preview.js" defer></script>
+<!-- Local style sheet -->
+<link rel="stylesheet" type="text/css" href="style.css">
+<!-- Google fonts and icons -->
+<link rel="stylesheet" type="text/css" href="open_sans.css">
+<link rel="stylesheet" type="text/css" href="material_icons.css">
+</head>
+<body>
+  <div class="wrapper" style="padding: 10px;">
+    <!-- image selection column -->
+    <div style="width: 100%; height: 650px; display: inline-block; min-height: 650px;">
+      <div calss="toggle-div" style="width: 32%; height: 100%; float: left;">
+        <div class="toggle-div-banner">FILE SELECTION</div>
+        <div class="toggle-div-body" style="height: calc(100% - 32px);">
+          <select id="calFileSelectMode" style="width: 95%; margin-top: 10px;">
+            <option value="sequence">sequence of images</option>
+            <option value="video">video frames</option>
+          </select>
+          <div class="video-input">
+            <label for="leftCalVideoInput" class="custom-file-input action-li" style="padding-left:0px;"> <i
+              class="material-icons md-dark md-br-pad"
+            >camera_roll</i> load video
+            </label>
+            <div id="videoCalLeftPreview" style="word-wrap: break-word; margin-bottom: 0px;"
+              class="nav-item"
+            >
+              <span id="videoCalLeftPreviewSpan"></span>
+            </div>
+            <input id="leftCalVideoInput" type="file" accept=".cine,.mp4">
+            <div class="video-input stereoOption">
+              <label for="rightCalVideoInput" class="custom-file-input action-li" style="padding-left:0px;"> <i
+                class="material-icons md-dark md-br-pad"
+              >camera_roll</i> load stereo video
+              </label>
+              <div id="videoCalRightPreview" style="word-wrap: break-word; margin-bottom: 10px;"
+                class="nav-item"
+              >
+                <span id="videoCalRightPreviewSpan"></span>
+              </div>
+              <input id="rightCalVideoInput" type="file" accept=".cine,.mp4">
+            </div>
+            <div id="videoCalStart" style="word-wrap: break-word; margin-bottom: 10px; margin-left:0px;"
+              class="nav-item"
+            >file start index: 
+              <span id="videoCalStartSpan"></span>
+            </div>
+            <div id="videoCalEnd" style="word-wrap: break-word; margin-bottom: 10px; margin-left:0px;"
+              class="nav-item"
+            >file end index: 
+              <span id="videoCalEndSpan"></span>
+            </div>
+          </div>
+          <div class="sequence-input">
+            <div id="changeImageFolder" class="action-li" style="margin-top: 10px;">
+              <i class="material-icons md-dark md-br-pad" style="margin-bottom: 0px;">folder</i>
+              image folder
+            </div>
+            <div id="imageFolder" style="word-wrap: break-word; margin-bottom: 10px;">
+              <span id="imageFolderSpan"></span>
+            </div>
+            <div>image prefix</div>
+            <input type="text" id="imagePrefix" name="imagePrefix" value="" style="width: 100%;">
+            <div class="stereoOption stereoPrefix" style="display: flex;">
+              <div id="stereoLeftPrefixText" style="flex: 50%; margin-right: 10px;">
+                stereo left prefix <input type="text" id="stereoLeftPrefix" name="stereoLeftPrefix"
+                  value="" style="width: 100%;"
+                >
+              </div>
+              <div id="stereoRightPrefixText" style="flex: 50%">
+                stereo right prefix <input type="text" id="stereoRightPrefix"
+                  name="stereoRightPrefix" value="" style="width: 100%;"
+                >
+              </div>
+            </div>
+          </div>
+          <div style="display: flex;">
+            <div style="flex: 50%; margin-right: 10px;">start index
+            <input type="text" id="startIndex" name="startIndex" value="0" style="width: 100%;"></div>
+            <div style="flex: 50%">end index
+            <input type="text" id="endIndex" name="endIndex" value="0" style="width: 100%;"></div>
+          </div>
+          <div>frame interval</div>
+          <input type="text" id="skipIndex" name="skipIndex" value="1" style="width: 100%;">
+          <div class="sequence-input">
+            <div>
+              digits in number <input type="text" id="numDigits" name="numDigits" value="1"
+                style="width: 100%;"
+              >
+            </div>
+            <div style="display: flex;">
+              <div class="stereoOption leftSuffix" id="stereoLeftSuffixText"
+                style="flex: 50%; margin-right: 10px;"
+              >
+                stereo left suffix <input class="stereoOption leftSuffix" type="text"
+                  id="stereoLeftSuffix" name="stereoLeftSuffix" value="_0" style="width: 100%;"
+                >
+              </div>
+              <div class="stereoOption rightSuffix" style="flex: 50%">
+                stereo right suffix <input class="stereoOption rightSuffix" type="text"
+                  id="stereoRightSuffix" name="stereoRightSuffix" value="_1" style="width: 100%"
+                >
+              </div>
+            </div>
+            <div>extension</div>
+            <input type="text" id="imageExtension" name="imageExtension" value=""
+              style="width: 100%; margin-bottom: 10px;"
+            >
+          </div>
+          <div class="2dOption">pose estimation frame</div>
+          <input class="2dOption" type="text" id="imagePoseIndex" name="imagePoseIndex" value="0"
+            style="width: 100%; margin-bottom: 10px;"
+          >
+          <div style="display: flex;">
+            <div id="previewCal" class="action-li" style="margin-top: 10px; flex:30%;">
+              <i class="material-icons md-dark md-br-pad" style="margin-bottom: 0px;">check_circle</i>
+              preview
+            </div>
+            <div style="flex: 70%; margin-top:10px;">
+              <input id="previewThreshCheck" type="checkbox"> include threshold
+            </div>
+          </div>
+          <div id="framePreview" style="width: 100%;">
+            <span id="frameStartPreviewSpan" style="display: block; float: left; width: 33%;">0</span><span
+              id="frameCurrentPreviewSpan"
+              style="display: block; text-align: center; float: left; width: 33%;"
+            >0</span><span id="frameEndPreviewSpan"
+              style="display: block; text-align: right; float: left; width: 33%;"
+            >1</span>
+          </div>
+          <input style="width: 100%;" id="calFrameScroller" type="range" min="0" max="1"
+            defaultValue="0" value="0" step="1"
+          >
+          <div class="sequence-input" style="margin-bottom: 4px; margin-top: 10px;">sample left cal image filename:</div>
+          <div id="imageSequencePreview" class="sample-filename sequence-input"
+            style="word-wrap: break-word; margin-bottom: 10px; height: 200px;"
+          >
+            <span id="imageSequencePreviewSpan"></span>
+          </div>
+        </div>
+      </div>
+      <!-- board dimensions column -->
+      <div class="toggle-div" style="width: 32%; height: 100%; float: left; margin-left: 10px;">
+        <div class="toggle-div-banner">PATTERN OPTIONS</div>
+        <div class="toggle-div-body" style="height: calc(100% - 32px);">
+          <div>
+            <!-- style="width:30%; height:100%; float:left;">-->
+            <div style="display: inline-block;">
+              <label for="calTargetInput" class="custom-file-input action-li"
+                style="display: inline-block; width: 170px; padding-left: 0px;"
+              > <i class="material-icons md-dark md-br-pad">folder</i> load target
+              </label> <input id="calTargetInput" type="file" accept=".xml">
+              <div id="calSaveTargetButton" class="action-li" style="display:inline-block; margin-top: 10px; width: 145px">
+                <i class="material-icons md-dark md-br-pad" style="margin-bottom: 0px;">save</i>
+                save target
+              </div>
+            </div>
+            <select id="calMode" style="width: 75%; margin-bottom: 5px; margin-top: 5px;">
+              <option value="vic3d">symmetric dot grid with special corner dots</option>
+              <option value="vic3dDark">symmetric dot grid with special corner dots (white
+                dots on black)</option>
+              <option value="checkerboard">checkerboard</option>
+            </select> <img id="boardImage" src="./images/dots_diagram.png"
+              alt="example checkerboard cal target" height="auto" width="350"
+            >
+          </div>
+           <div class="board-size" >
+            <div style="display: inline-block; margin-bottom: 0px; ">
+              <p style="width: 170px; margin-top: 5px;">total pattern width</p>
+              <select id="calWidth" style="width: 100px;">
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+                <option value="15">15</option>
+                <option value="16">16</option>
+                <option value="17">17</option>
+                <option value="18">18</option>
+                <option value="19">19</option>
+                <option value="20">20</option>
+                <option value="21">21</option>
+                <option value="22">22</option>
+                <option value="23">23</option>
+                <option value="24">24</option>
+                <option value="25">25</option>
+              </select>
+            </div>
+            <div style="display: inline-block;">
+              <p style="width: 145px;">total pattern height</p>
+              <select id="calHeight" style="width: 100px; ">
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+                <option value="15">15</option>
+                <option value="16">16</option>
+                <option value="17">17</option>
+                <option value="18">18</option>
+                <option value="19">19</option>
+                <option value="20">20</option>
+                <option value="21">21</option>
+                <option value="22">22</option>
+                <option value="23">23</option>
+                <option value="24">24</option>
+                <option value="25">25</option>
+              </select>
+            </div>
+          </div>
+          <div class="board-size-dots" >
+            <div style="display: inline-block; margin-bottom: 0px;">
+              <p style="width: 170px; margin-top: 5px;">inner pattern width</p>
+              <select id="calInnerWidth" style="width: 100px; ">
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+              </select>
+            </div>
+            <div style="display: inline-block;">
+              <p style="width: 145px;">inner pattern height</p>
+              <select id="calInnerHeight" style="width: 100px; ">
+                <option value="3">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+              </select>
+            </div>
+          </div>
+          <div class="origin-loc">
+            <div style="display: inline-block; margin-bottom: 0px;">
+              <p style="width: 170px;  margin-top: 5px;">origin offset x</p>
+              <select class="origin-loc" id="calOriginX" style="width: 100px;">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+              </select>
+            </div>
+            <div style="display: inline-block;">
+              <p style="width: 145px;">origin offset y</p>
+              <select class="origin-loc" id="calOriginY" style="width: 100px;">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:inline-block;">
+            <div style="display:inline-block; width:170px;">
+              <div id="calOptionsButton" class="action-li" style="margin-top: 10px;">
+                <i class="material-icons md-dark md-br-pad" style="margin-bottom: 0px;">settings</i>
+                cal options
+              </div>
+              <div style="margin-top: 5px; width:170px;">
+                <input id="autoThreshCheck" type="checkbox" checked> auto threshold
+              </div>
+            </div>
+            <div style="margin-top: 0px; display:inline-block; width:145px;">
+              pattern spacing</br> 
+              <input type="text" id="targetSpacingSize"
+                name="targetSpacingSize" value="1.0" style="width: 60%; margin-top: 5px;"
+              >
+            </div>
+          </div>
+          <div class="threshold-options">
+            <div style="display: inline-block;">
+              <div id="calUseAdaptiveThreshP" style="margin-top: 10px; width:145px;">
+                <input id="adaptiveThreshCheck" type="checkbox"> use adaptive
+              </div>
+            </div>
+            <div class="adaptive-thresh">
+              <div style="display:block; float:left; margin-right:10px;">
+                <p id="calAdaptiveThreshP" style="margin-top: 0px;">
+                  adaptive thresh constant: <label id="calAdaptiveThreshConstantLabel">50</label>
+                </p>
+                <input id="calAdaptiveThreshConstant" type="range" min="-75" max="100.0"
+                  defaultValue="50" value="50" step="1"
+                >
+              </div>
+              <div style="display:block;">
+                <p id="calBlocksizeP" style="margin-top: 10px;">
+                  block size: <label id="calBlockSizeLabel">75</label>
+                </p>
+                <input id="calBlockSize" type="range" min="1" max="100"
+                  defaultValue="75" value="75" step="1"
+                >
+              </div>
+            </div>
+            <p id="calThreshP" style="margin-top: 10px;">
+              thresholding constant: <label id="calThreshConstantLabel">100</label> (counts)
+            </p>
+            <input id="calThreshConstant" type="range" min="1" max="255.0" defaultValue="100"
+              value="100" step="1"
+            >
+          </div>
+        </div>
+      </div>
+      <!-- end middle col top row-->
+      <div class="toggle-div"
+        style="width: 32%; height: 100%; float: left; margin-left: 10px; overflow: auto;"
+      >
+        <div class="toggle-div-banner">CALIBRATION</div>
+        <div class="toggle-div-body" style="height: calc(100% - 32px);">
+          <!-- preview area for the processing cal -->
+          <div id="calConsoleWindow" class="cal-console"
+            style="border: 1px solid #D0D0D0; background-color: #FFFFFF; margin-top: 10px; padding: 5px; width: 100%; height: 200px;"
+          >
+            Console output: <br />
+            <br />
+          </div>
+          <div id="runLoaderCal" class="pre-loader"
+            style="margin-top: 10px; margin-bottom: 10px; width: 100%;"
+          ></div>
+          <button class="calib-button float-left" id="calibrateButton" type="button">calibrate</button>
+          <button class="calib-button float-left" id="acceptButton" type="button">accept</button>
+          <button class="calib-button float-left" id="cancelButton" type="button">abort</button>
+          <div id="calOutputPreview"
+            style="font-weight: bold; word-wrap: break-word; margin-top: 5px;"
+          >
+            output file: <span style="font-weight: normal;" id="calOutputPreviewSpan"></span>
+          </div>
+          <div id="rmsPreview" style="font-weight: bold; word-wrap: break-word; margin-top: 5px;">
+            rms error: <span style="font-weight: normal;" id="rmsPreviewSpan"></span>
+          </div>
+          <div id="epipolarPreview" class="stereoOption"
+            style="font-weight: bold; word-wrap: break-word; margin-top: 5px;"
+          >
+            avg epipolar error: <span style="font-weight: normal;" id="epipolarPreviewSpan"></span>
+          </div>
+          <div style="margin-top: 5px;">select files to skip (ctrl click
+            to deselect):</div>
+          <div class="selectable-box">
+            <ol id="selectable">
+              <!--<li class="ui-widget-content">Item 1</li>-->
+            </ol>
+          </div>
+        </div>
+        <!-- end right col top row -->
+      </div>
+    </div>
+    <!-- end second row -->
+    <div style="width: 100%; height: calc(100% - 650px); float: left;">
+      <div id="leftPreviewToggle" class="toggle-div" style="float: left; height: 100%; width: 32%;">
+        <div class="toggle-div-banner">
+          <span style="display: block; float: left; text-align: left; width: 40%;">PREVIEW
+            LEFT</span><span id="previewLeftSpan"
+            style="display: block; float: left; text-align: right; color: red; width: 60%;"
+          ></span>
+        </div>
+        <div id="leftPreviewBody" class="toggle-div-body"
+          style="padding: 0px; height: calc(100% - 32px); min-height: 200px;"
+        >
+          <div id="viewWindowLeftCal" style="background-color: #ffffff; width: 100%; height: 100%;">
+            <div id="plotlyViewerCalLeft" class="plotly-viewer">
+              <!-- placeholder for plotly plots -->
+            </div>
+          </div>
+        </div>
+        <!-- close body -->
+      </div>
+      <!-- close toggle div -->
+      <div id="rightPreviewToggle" class="toggle-div stereoOption"
+        style="float: left; height: 100%; width: 32%; margin-left: 10px;"
+      >
+        <div class="toggle-div-banner">
+          <span style="display: block; float: left; text-align: left; width: 40%;">PREVIEW
+            RIGHT</span><span id="previewRightSpan"
+            style="display: block; float: left; text-align: right; color: red; width: 60%;"
+          ></span>
+        </div>
+        <div id="rightPreviewBody" class="toggle-div-body"
+          style="padding: 0px; height: calc(100% - 32px); min-height: 200px;"
+        >
+          <div id="viewWindowRightCal" style="background-color: #ffffff; width: 100%; height: 100%;">
+            <div id="plotlyViewerCalRight" class="plotly-viewer">
+              <!-- placeholder for plotly plots -->
+            </div>
+          </div>
+        </div>
+        <!-- close body -->
+      </div>
+      <!-- close toggle div -->
+    </div>
+    <!-- end preivew row -->
+    <!--<div style="width:100%">-->
+    <!--<div style="margin-top:20px;">binary conversion threshold: <label id="binaryLabel">30</label></div>
+             <input id="binaryThresh" type="range" min="0" max="254.0" defaultValue="30" value="30" step="2">-->
+    <!--</div>-->
+  </div>
+  <!-- end content-->
+</body>
+</html>

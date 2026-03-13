@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ParameterList>
+  <Parameter name="xml_file_format" type="string" value="DICe_xml_camera_system_file"/>
+  <Parameter name="system_type_3D" type="string" value="OPENCV"/>
+  <Parameter name="extrinsics_relative_camera_to_camera" type="bool" value="true"/>
+  <Parameter name="avg_epipolar_error" type="double" value="1.856613030593e+02"/>
+  <ParameterList name="CAMERA 0">
+    <Parameter name="CX" type="double" value="1.223500000000e+03"/>
+    <Parameter name="CY" type="double" value="1.023500000000e+03"/>
+    <Parameter name="FX" type="double" value="3.588199318588e+03"/>
+    <Parameter name="FY" type="double" value="3.590431581162e+03"/>
+    <Parameter name="Fs" type="double" value="0.000000000000e+00"/>
+    <Parameter name="K1" type="double" value="-3.376864921855e-01"/>
+    <Parameter name="K2" type="double" value="2.136419179488e-01"/>
+    <Parameter name="K3" type="double" value="3.754873434648e+00"/>
+    <Parameter name="LENS_DISTORTION_MODEL" type="string" value="OPENCV_LENS_DISTORTION"/>
+    <Parameter name="TX" type="double" value="0.000000000000e+00"/>
+    <Parameter name="TY" type="double" value="0.000000000000e+00"/>
+    <Parameter name="TZ" type="double" value="0.000000000000e+00"/>
+    <ParameterList name="rotation_3x3_matrix">
+      <Parameter name="ROW 0" type="string" value="{ 1.000000000000e+00, 0.000000000000e+00, 0.000000000000e+00 }"/>
+      <Parameter name="ROW 1" type="string" value="{ 0.000000000000e+00, 1.000000000000e+00, 0.000000000000e+00 }"/>
+      <Parameter name="ROW 2" type="string" value="{ 0.000000000000e+00, 0.000000000000e+00, 1.000000000000e+00 }"/>
+    </ParameterList>
+    <Parameter name="IMAGE_HEIGHT_WIDTH" type="string" value="{ 2448, 2048 }"/>
+    <Parameter name="PIXEL_DEPTH" type="int" value="-1"/>
+  </ParameterList>
+  <ParameterList name="CAMERA 1">
+    <Parameter name="CX" type="double" value="1.223500000000e+03"/>
+    <Parameter name="CY" type="double" value="1.023500000000e+03"/>
+    <Parameter name="FX" type="double" value="6.501836478090e+02"/>
+    <Parameter name="FY" type="double" value="6.512602156795e+02"/>
+    <Parameter name="Fs" type="double" value="0.000000000000e+00"/>
+    <Parameter name="K1" type="double" value="-7.259900145432e-03"/>
+    <Parameter name="K2" type="double" value="-6.518724587530e-04"/>
+    <Parameter name="K3" type="double" value="1.836307964550e-04"/>
+    <Parameter name="LENS_DISTORTION_MODEL" type="string" value="OPENCV_LENS_DISTORTION"/>
+    <Parameter name="TX" type="double" value="-1.203861045022e+01"/>
+    <Parameter name="TY" type="double" value="5.071336481426e+00"/>
+    <Parameter name="TZ" type="double" value="-1.751605146323e+01"/>
+    <ParameterList name="rotation_3x3_matrix">
+      <Parameter name="ROW 0" type="string" value="{ -9.339014434948e-01, -9.077698312828e-02, 3.458144490509e-01 }"/>
+      <Parameter name="ROW 1" type="string" value="{ 4.958492714826e-02, -9.907685730911e-01, -1.261703989637e-01 }"/>
+      <Parameter name="ROW 2" type="string" value="{ 3.540754564185e-01, -1.006835334555e-01, 9.297813706743e-01 }"/>
+    </ParameterList>
+    <Parameter name="IMAGE_HEIGHT_WIDTH" type="string" value="{ 2448, 2048 }"/>
+    <Parameter name="PIXEL_DEPTH" type="int" value="-1"/>
+  </ParameterList>
+</ParameterList>

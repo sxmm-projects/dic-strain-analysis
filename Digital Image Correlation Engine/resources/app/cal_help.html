@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Calibration Help</title>
+<script>
+    if (typeof module === 'object') {
+        window.module = module;
+        module = undefined;
+    }
+</script>
+<script src="./js/jquery.min.js"></script>
+<script src="./js/jquery-ui.js"></script>
+<script>
+    if (window.module)
+        module = window.module;
+</script>
+<script type="text/javascript" src="./js/loader.js"></script>
+<script src="./js/requires.js" defer></script>
+<!-- Local style sheet -->
+<link rel="stylesheet" type="text/css" href="style.css">
+<!-- Google fonts and icons -->
+<link rel="stylesheet" type="text/css" href="open_sans.css">
+<link rel="stylesheet" type="text/css" href="material_icons.css">
+</head>
+<body style="background-color: white;">
+  <div style="background-color: white;">
+    <div style="padding: 20px;">
+      <h2>Performing a Stereo or Single Camera Calibration</h2>
+      <p>Select 'perform cal' to run a calibration given a set of images using the OpenCV
+        calibration tools through DICe.</p>
+      <p>The first step in performing a calibration is selecting the image file folder. Once
+        this folder is selected, DICe will attempt to automatically determine the file naming
+        convention. If this fails, the components of the file naming convention need to be filled in
+        manually. If the components of the naming convention are filled in correctly, an example
+        image name will appear in green at the bottom of the first column on the calibration tool.
+        If the name appears in red, this indicates that the file pattern is invalid. (note: all numbers
+        in the filenames should be padded with zeros, for example if there are 10 images the image numbering
+        should be _00 ... _10, not _0 ... _10, or for 100 images _000 ... _100, not _0 ... _100.)</p>
+      <p>The second step is to select the pattern parameters, beginning with the type of
+        calibration plate that is used in the images. There are three options for this:
+        checkerboard, black dots on a white background, and white dots on a black background. Once
+        the pattern type is selected, the user must input the dimensions of the board, including the
+        spacing size.</p>
+      <p>To preview the calibration marker extraction for a particular image, click the
+        'Preview' button in the left column of the tool. If the marker extraction is successful, the
+        images will appear with a green border. A red border indicates a failed extraction.</p>
+      <p>For checkerboard patterns, there are thresholding options that can be adjusted. For dot
+        patterns, the default thresholding used involves stepping through a series of constant
+        binary threshold values until the marker dots can be extracted. The threshold setting can be
+        changed by de-selecting the auto-threshold check box and setting the parameters.</p>
+      <p>If the calibration is successful, a cal.txt file will be created in the working
+        directory. This file must then be loaded by pressing the 'accept' button in the calibration
+        tool. An existing calibration file can be loaded using the 'load cal' menu option and
+        selecting the file.</p>
+      <p>For a stereo calibration, the epipolar error should be less than 0.5 pixels. Large
+        epipolar errors happen when one or more of the images introduces too much reprojection
+        error. If this occurrs, look at the cal.log file in the working directory to see which
+        images have the highest error. Through trial and error, eliminate images by selecting them
+        in the list in the right column and re-running the calibration until the error is less than 0.5 pixels.</p>
+      <p>For single camera calibration, only the intrinsic parameters are estimated (such as the
+        focal lengths, image centroids, etc). No reprojection error is calculated so there isn't a
+        quality metric for the single camera calibration other than the RMS error.</p>
+      <h2>Loading an Existing Calibration File</h2>
+      <p>If the calibration has already been completed, or you would like to use an existing
+        calibration file, select the 'load cal' menu option and select the desired file. DICe uses a
+        specific xml format for calibration files, but can also read VIC3D xml files.</p>
+      <h1>VIC3D XML Format</h1>
+      <p>This is a format similar to the one used in a VIC3D .z3d file. Note that the
+        orientations for each camera are not with respect to each other, but the origin between the
+        two cameras. The file extension must be .xml for this format to be used (.z3d files must be
+        unzipped. The .xml file from the archive can then be loaded in DICe)</p>
+      <xmp> <calibration lri="calibration"> <camera id="0">182.694
+      184.935 2428.49 2431.72 3.39496 0.0881161 0 0 <orientation>-179.925 -14.7548
+      0.578387 1644 5.43174 970.919</orientation> </camera> <camera id="1">211.986 191.741 2479.9 2484.28 2.99616
+      0.112661 0 0 <orientation>179.77 14.7532 -0.617865 -1765.32 -49.9461 1075.75</orientation> </camera> </calibration> </xmp>
+    </div>
+  </div>
+  <!-- end content-->
+</body>
+</html>

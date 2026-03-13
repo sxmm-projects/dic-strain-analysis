@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calibration Interface</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/calibration.css') }}">
+    <script src="{{ url_for('static', filename='js/javacalibrate.js') }}"></script>
+
+</head>
+<body>
+    <div id="viewphoto" class="viewphoto">
+        <span class="close" onclick="closebutton()">&times;</span>
+        <div class="dis-key">Displaying image:<span id="image-counter"> NaN</span></div>
+        <div class="watch">
+          <div class="modal-content1" id="container1">
+            <img id="modalImage1" class="image">
+          </div>
+          <div class="modal-content2" id="container2">
+            <img id="modalImage2" class="image">
+          </div>
+        </div>
+        <a class="prev" onclick="changePhoto(-1)">&#10094;</a>
+        <a class="next" onclick="changePhoto(1)">&#10095;</a>
+    </div>  
+    <div class="calibration-container">
+        <div class="header-wrapper">
+            <button onclick="goHome()" class="home-button">Home</button>
+            <h2 class="calibration-header">Stereo Camera Calibration</h2>
+        </div>
+        <div class="container">
+            
+            <!-- First Block: File Selection and Console Output Block -->
+            <div class="file-selection">
+                <h3>File Selection</h3>
+                <form id="upload-form" class="calibration-form" enctype="multipart/form-data">
+                    <label for="parameter-file">Parameter XML:</label>
+                    <input type="file" id="parameter-file" name="parameter_file" accept=".xml"><br>
+
+                    <label for="keypoints-left-file">Keypoints Left XML:</label>
+                    <input type="file" id="keypoints-left-file" name="keypoints_left_file" accept=".xml"><br>
+
+                    <label for="keypoints-right-file">Keypoints Right XML:</label>
+                    <input type="file" id="keypoints-right-file" name="keypoints_right_file" accept=".xml"><br>
+
+                    <!-- Upload Files button -->
+                    <button type="button" class="calibration-button" onclick="uploadFiles()">Upload Files</button>
+                </form>
+
+                <!-- Console Output Block -->
+                <div class="console-output-section">
+                    <h3>Calibration Console Output</h3>
+                    <textarea id="console-output" class="console-output" readonly>Console Output</textarea>
+                </div>
+
+                <!-- Start Calibration button -->
+                <button type="button" class="calibration-button" onclick="startCalibration()">Start Calibration</button>
+
+                <!-- Start Keypoint Detection button -->
+                <button type="button" class="calibration-button" onclick="startKeypointDetection()">Start Keypoint Detection</button>
+            </div>
+
+            <!-- Second Block: Pattern Options Block with Keypoint Image and Set Parameters -->
+            <div class="pattern-options">
+                <h3>Pattern Options</h3>
+
+                <!-- Keypoint Image -->
+                <div class="keypoint-image">
+                    <img id="keypoint-img" src="{{ url_for('static', filename='keypointimg.jpg') }}" alt="Keypoint Image">
+                </div>
+
+                <!-- Pattern Options -->
+                <div class="pattern-settings">
+                    <label for="total-pattern-width">Total X Keypoint Number:</label>
+                    <select id="total-pattern-width" name="total-x">
+                        <script>
+                            for (let i = 3; i <= 26; i++) {
+                                if (i === 14) {
+                                    document.write(`<option value="${i}" selected>${i}</option>`);
+                                } else {
+                                    document.write(`<option value="${i}">${i}</option>`);
+                                }
+                            }
+                        </script>
+                    </select><br>
+
+                    <label for="total-pattern-height">Total Y Keypoint Number:</label>
+                    <select id="total-pattern-height" name="total-y">
+                        <script>
+                            for (let i = 3; i <= 26; i++) {
+                                if (i === 10) {
+                                    document.write(`<option value="${i}" selected>${i}</option>`);
+                                } else {
+                                    document.write(`<option value="${i}">${i}</option>`);
+                                }
+                            }
+                        </script>
+                    </select><br>
+
+                    <label for="inner-pattern-width">Inner X Keypoint Number:</label>
+                    <select id="inner-pattern-width" name="innerX" oninput="validatePatternSpacing()">
+                        <script>
+                            for (let i = 3; i <= 26; i++) {
+                                if (i === 10) {
+                                    document.write(`<option value="${i}" selected>${i}</option>`);
+                                } else {
+                                    document.write(`<option value="${i}">${i}</option>`);
+                                }
+                            }
+                        </script>
+                    </select><br>
+
+                    <label for="inner-pattern-height">Inner Y Keypoint Number:</label>
+                    <select id="inner-pattern-height" name="innerY" oninput="validatePatternSpacing()">
+                        <script>
+                            for (let i = 3; i <= 26; i++) {
+                                if (i === 6) {
+                                    document.write(`<option value="${i}" selected>${i}</option>`);
+                                } else {
+                                    document.write(`<option value="${i}">${i}</option>`);
+                                }
+                            }
+                        </script>
+                    </select><br>
+
+                    <label for="original-offsetX">Origin Offset X:</label>
+                    <select id="original-offsetX" name="offsetX">
+                        <script>
+                            for (let i = 0; i <= 10; i++) {
+                                if (i === 2) {
+                                    document.write(`<option value="${i}" selected>${i}</option>`);
+                                } else {
+                                    document.write(`<option value="${i}">${i}</option>`);
+                                }
+                            }
+                        </script>
+                    </select><br>
+
+                    <label for="original-offsetY">Origin Offset Y:</label>
+                    <select id="original-offsetY" name="offsetY">
+                        <script>
+                            for (let i = 0; i <= 10; i++) {
+                                if (i === 2) {
+                                    document.write(`<option value="${i}" selected>${i}</option>`);
+                                } else {
+                                    document.write(`<option value="${i}">${i}</option>`);
+                                }
+                            }
+                        </script>
+                    </select><br>
+
+                    <label for="outer-diameter">Corner Outer Diameter (mm):</label>
+                    <input type="number" id="outer-diameter" step="0.1" value="1.2"><br>                     
+
+                    <label for="inner-diameter">Corner Inner Diameter (mm):</label>
+                    <input type="number" id="inner-diameter" step="0.1" value="0.6"><br>           
+
+                    <label for="field-outer">Keypoint Outer Diameter (mm):</label>
+                    <input type="number" id="field-outer" step="0.1" value="1.0"><br>
+
+                    <label for="field-inner">Keypoint Inner Diameter (mm):</label>
+                    <input type="number" id="field-inner" step="0.1" value="0.6"><br>
+
+                    <label for="x-length">X Length (mm):</label>
+                    <input type="number" id="x-length" step="0.1" value="33.5" oninput="validatePatternSpacing()"><br>
+
+                    <label for="y-length">Y Length (mm):</label>
+                    <input type="number" id="y-length" step="0.1" value="18.4" oninput="validatePatternSpacing()"><br>
+
+                    <label for="pattern-spacing">Pattern Spacing (mm):</label>
+                    <input type="number" id="pattern-spacing" step="0.1" value="3.7" oninput="validatePatternSpacing()"><br>
+
+                    <div id="validation-result" style="color: red; font-weight: bold;"></div>
+
+                    <!-- Set Parameters Section -->
+                    <h4 class="set-parameters-header">Set Parameters</h4>
+                    <label for="imgNumberStart">Image Number Start:</label>
+                    <input type="number" id="imgNumberStart" value="1" min="1"><br>
+                    <label for="imgNumberEnd">Image Number End:</label>
+                    <input type="number" id="imgNumberEnd" value="5" min="1"><br>
+
+                    <!-- Image and Data Folder Selection -->
+                    <div class="folder-selection">
+                        <div class="folder-selection-container">
+                            <label class="folder-button" id="leftImgDirectory">Choose Image Folder 1</label>
+
+                            <label class="folder-button" id="rightImgDirectory">Choose Image Folder 2</label>
+                        </div>
+
+                        <div class="folder-selection-container">
+                            <label class="folder-button" id="leftDatDirectory">Choose Data Folder 1</label>
+
+                            <label class="folder-button" id="rightDatDirectory">Choose Data Folder 2</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Third Block: Video Streams and Image Size Checker -->
+            <div class="calibration-section">
+                <h3>Real-time Keypoint Detection</h3>
+
+                <!-- Video stream for Camera 1 with a placeholder -->
+                <h4 class="imgd-text">Camera 1 Video Feed</h4>
+                <div class="imgdetect-container">
+                    <img class="imgdetect" id="imageKeydetect1" alt="Keydetect Image" style="max-width: 100%;">
+                </div>
+                <h4 class="imgd-text">Camera 2 Video Feed</h4>
+                <div class="imgdetect-container">
+                    <img class="imgdetect" id="imageKeydetect2" alt="Keydetect Image" style="max-width: 100%;">
+                </div>
+                <!-- Check Image Size Block -->
+                <h3>Check Image Size (Pixel x Pixel)</h3>
+                <div id="image-size-check">
+                    
+                    <!-- Button for selecting the left image folder -->
+                     <!--
+                    <label class="folder-button" onclick="document.getElementById('leftImgFolder').click()">Choose Left Image Folder</label>
+                    <input type="file" id="leftImgFolder" webkitdirectory directory multiple style="display: none;" onchange="checkFolderImages('leftImgFolder', 'Left')">
+                    -->
+                    <!-- Button for selecting the right image folder -->
+                     <!--
+                    <label class="folder-button" onclick="document.getElementById('rightImgFolder').click()">Choose Right Image Folder</label>
+                    <input type="file" id="rightImgFolder" webkitdirectory directory multiple style="display: none;" onchange="checkFolderImages('rightImgFolder', 'Right')">
+                    -->
+                    <button class="folder-button" onclick="document.getElementById('left-file-input').click()">Choose Left Image Folder</button>
+                    <input type="file" id="left-file-input" style="display:none" multiple>
+
+                    <button class="folder-button" onclick="document.getElementById('right-file-input').click()">Choose Right Image Folder</button>
+                    <input type="file" id="right-file-input" style="display:none" multiple>
+                </div>
+                
+                <!-- Display output for each folder's dimension check results -->
+                <div id="dimensionCheckOutput" style="margin-top: 10px;">
+                    <p><span id ="leftcheck">Left Folder</span></p>
+                    <p><span id ="rightcheck">Right Folder </span></p>
+                </div>
+                <label class="folder-button" onclick="viewKeypoint()">View Images</label>
+            </div>
+        </div>
+    </div>
+
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+
+
+    <script>
+        const socket = io.connect('http://' + document.domain + ':' + location.port);
+    
+        socket.on('keypoint_frame', function(data) {
+            const keypointImg = document.getElementById('keypoint-detection-output');
+            const placeholderText = document.getElementById('keypoint-detection-placeholder');
+            
+            // Update the image source with the received frame
+            keypointImg.src = 'data:image/jpeg;base64,' + data.image;
+            
+            // Show the image and hide the placeholder
+            placeholderText.style.display = 'none';
+            keypointImg.style.display = 'block';
+        });
+    
+        // Listen for real-time console output from the backend
+        socket.on('console_output', function(message) {
+            const consoleOutput = document.getElementById('console-output');
+            consoleOutput.value += '\n' + message;
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        });
+    </script>-->
+</body>
+</html>
