@@ -93,6 +93,6 @@ This software can be applied in:
 
 ## Author
 
-Rungphailin Siamphupong
-Poomipat Thongthae
-Developed as part of a **Robotics Engineering and Automation Systems** project focusing on computer vision applications in engineering analysis.
+Rungphailin Siamphupong <br>
+Poomipat Thongthae <br>
+Developed as part of a Robotics Engineering and Automation Systems project focusing on computer vision applications in engineering analysis.
